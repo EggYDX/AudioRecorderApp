@@ -1,0 +1,33 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch: # 这是一个神奇的指令，它会在网页上生成一个手动打包的按钮
+
+jobs:
+  build:
+    runs-on: windows-latest # 明确告诉机器人：必须用 Windows 系统的虚拟电脑
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Python 环境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # 使用稳定的 Python 版本
+
+    - name: 安装依赖与打包工具
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install -r requirements.txt
+
+    - name: 执行打包 (生成单文件静默版EXE)
+      run: |
+        pyinstaller --noconfirm --onefile --windowed --name "AudioRecorderApp" main.py
+
+    - name: 提取并上传 EXE 文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: AudioRecorderApp-Windows-EXE
+        path: dist/AudioRecorderApp.exe
